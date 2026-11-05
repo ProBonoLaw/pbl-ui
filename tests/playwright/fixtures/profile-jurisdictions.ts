@@ -106,7 +106,11 @@ export async function chooseCombobox(
   index = 0,
 ) {
   const combobox = page.locator(`input[aria-label="${name}"]`).nth(index);
+  // Click before typing so the previous selection's deferred focus restoration
+  // cannot redirect fill() into the previous combobox.
+  await combobox.click();
   await combobox.fill(query);
+  await expect(combobox).toHaveValue(query);
   await expect(page.getByRole('option', { name: optionName })).toBeVisible();
   await page.getByRole('option', { name: optionName }).click();
 }

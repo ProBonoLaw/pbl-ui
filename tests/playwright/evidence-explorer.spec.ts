@@ -186,13 +186,26 @@ test('filters and renders case evidence', async ({ page }) => {
   await page.keyboard.press('Space');
   await expect(facts).toHaveAttribute('aria-pressed', 'true');
   await expect(search).toBeEnabled();
-  await page.getByRole('combobox', { name: 'Additional tags (all must match)' }).fill('contract');
+  const tags = page.getByRole('combobox', { name: 'Additional tags (all must match)' });
+  const who = page.getByRole('combobox', { name: 'Who (any may match)' });
+  const where = page.getByRole('combobox', { name: 'Where' });
+  const searchTerms = page.getByLabel('Search terms');
+  // Option selection restores focus on the next frame. Click each target before
+  // filling so the next query cannot end up in the previous filter's input.
+  await tags.click();
+  await tags.fill('contract');
   await page.getByRole('option', { name: 'contract', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Who (any may match)' }).fill('Jordan');
+  await who.click();
+  await who.fill('Jordan');
+  await expect(who).toHaveValue('Jordan');
   await page.getByRole('option', { name: 'Jordan Lee', exact: true }).click();
-  await page.getByRole('combobox', { name: 'Where' }).fill('King County');
+  await where.click();
+  await where.fill('King County');
+  await expect(where).toHaveValue('King County');
   await page.getByRole('option', { name: 'King County', exact: true }).click();
-  await page.getByLabel('Search terms').fill('notice');
+  await searchTerms.click();
+  await searchTerms.fill('notice');
+  await expect(searchTerms).toHaveValue('notice');
   await page.getByRole('button', { name: 'Search evidence' }).click();
 
   await expect(page.getByRole('heading', { name: 'A material fact in the case', exact: true })).toBeVisible();

@@ -389,11 +389,13 @@ test('case details edits and saves on the same route, and Cancel discards change
 
   const state = page.getByRole('combobox', { name: 'State', exact: true });
   await expect(state).toHaveValue('Washington from table');
+  await state.click();
   await state.fill('OK');
   await page.getByRole('option', { name: 'Oklahoma from table' }).click();
   await expect(page.locator('input[name="state"]')).toHaveValue('OK');
 
   const filingRole = page.getByRole('combobox', { name: 'Case Filing Role' });
+  await filingRole.click();
   await filingRole.fill('Petitioner');
   await page.getByRole('option', { name: 'Petitioner' }).click();
   await expect(page.getByRole('combobox', { name: 'Opposition Filing Role' })).toHaveValue('Respondent');

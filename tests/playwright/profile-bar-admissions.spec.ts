@@ -102,6 +102,7 @@ test.describe('Profile jurisdiction selectors', () => {
       'okla',
       'Oklahoma (State)',
     );
+    await page.getByRole('textbox', { name: 'Bar admission ID' }).click();
     await page.getByRole('textbox', { name: 'Bar admission ID' }).fill('OK-123');
 
     await page.getByRole('button', { name: 'Add admission' }).click();
@@ -119,6 +120,7 @@ test.describe('Profile jurisdiction selectors', () => {
       'U.S. District Court for the Northern District of Oklahoma',
       1,
     );
+    await page.getByRole('textbox', { name: 'Bar admission ID' }).nth(1).click();
     await page.getByRole('textbox', { name: 'Bar admission ID' }).nth(1).fill(
       'OKND-456',
     );
@@ -132,6 +134,7 @@ test.describe('Profile jurisdiction selectors', () => {
       'Cherokee Nation (federally recognized)',
       2,
     );
+    await page.getByRole('textbox', { name: 'Bar admission ID' }).nth(2).click();
     await page.getByRole('textbox', { name: 'Bar admission ID' }).nth(2).fill(
       'CN-789',
     );

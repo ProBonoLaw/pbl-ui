@@ -13,6 +13,7 @@ const graphPhotoApi = 'https://graph.microsoft.com/beta/me/photo/$value';
 
 async function selectBillingCode(page: Page, label: string, code: string) {
   const billingCode = page.getByRole('combobox', { name: 'Billing Code' });
+  await billingCode.click();
   await billingCode.fill(label);
   await page.getByRole('option', { name: label, exact: true }).click();
   await expect(page.locator('input[name="billingCode"]')).toHaveValue(code);
@@ -123,6 +124,7 @@ test.describe('Create case page', () => {
 
     const state = page.getByRole('combobox', { name: 'State', exact: true });
     await expect(state).toHaveValue('Oklahoma from table');
+    await state.click();
     await state.fill('WA');
     await page.getByRole('option', { name: 'Washington from table' }).click();
     await expect(state).toHaveValue('Washington from table');
@@ -131,19 +133,23 @@ test.describe('Create case page', () => {
     const filingRole = page.getByRole('combobox', { name: 'Case Filing Role' });
     const oppositionRole = page.getByRole('combobox', { name: 'Opposition Filing Role' });
 
+    await filingRole.click();
     await filingRole.fill('Plaintiff');
     await page.getByRole('option', { name: 'Plaintiff' }).click();
     await expect(oppositionRole).toHaveValue('Defendant');
     await expect(page.locator('input[name="oppositionFilingRole"]')).toHaveValue('Defendant');
 
+    await filingRole.click();
     await filingRole.fill('Petitioner');
     await page.getByRole('option', { name: 'Petitioner' }).click();
     await expect(oppositionRole).toHaveValue('Respondent');
 
+    await oppositionRole.click();
     await oppositionRole.fill('Plaintiff');
     await page.getByRole('option', { name: 'Plaintiff' }).click();
     await expect(filingRole).toHaveValue('Defendant');
 
+    await oppositionRole.click();
     await oppositionRole.fill('Petitioner');
     await page.getByRole('option', { name: 'Petitioner' }).click();
     await expect(filingRole).toHaveValue('Respondent');

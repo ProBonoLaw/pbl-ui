@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pb-law-backend
+  labels:
+    app: pb-law-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pb-law-backend
+  template:
+    metadata:
+      labels:
+        app: pb-law-backend
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: pb-law-backend
+      containers:
+        - name: pb-law-backend
+          image: pb-law-backend
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              value: "3000"
+          envFrom:
+            - configMapRef:
+                name: pb-law-backend-config
+          volumeMounts:
+            - name: key-vault
+              mountPath: /mnt/keyvault
+              readOnly: true
+            - name: internal-ca
+              mountPath: /app/certs
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: key-vault
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: pb-law-backend-key-vault
+        - name: internal-ca
+          configMap:
+            name: pb-law-backend-ca
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pb-law-backend
+  labels:
+    app: pb-law-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: pb-law-backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000

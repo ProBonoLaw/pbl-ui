@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+html:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* react-roast theme tokens (force app palette over package defaults) */
+  --rrn-clr-50: #ffffff !important;
+  --rrn-clr-100: #f9fafb !important;
+  --rrn-clr-200: #e5e7eb !important;
+  --rrn-clr-300: #d1d5db !important;
+  --rrn-clr-400: #9ca3af !important;
+  --rrn-clr-500: #6b7280 !important;
+  --rrn-clr-600: #4f46e5 !important;
+  --rrn-clr-700: #4338ca !important;
+  --rrn-clr-800: #312e81 !important;
+  --rrn-clr-900: #111827 !important;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+
+    /* react-roast theme tokens (dark mode: blues/greys/blacks) */
+    --rrn-clr-50: #111827 !important;
+    --rrn-clr-100: #1f2937 !important;
+    --rrn-clr-200: #374151 !important;
+    --rrn-clr-300: #4b5563 !important;
+    --rrn-clr-400: #9ca3af !important;
+    --rrn-clr-500: #d1d5db !important;
+    --rrn-clr-600: #818cf8 !important;
+    --rrn-clr-700: #a5b4fc !important;
+    --rrn-clr-800: #e5e7eb !important;
+    --rrn-clr-900: #f9fafb !important;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.app-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.app-data-table thead {
+  background: #f9fafb;
+}
+
+.app-data-table th,
+.app-data-table td {
+  padding: 0.875rem 0.75rem;
+  vertical-align: top;
+}
+
+.app-data-table thead th {
+  font-weight: 600;
+  white-space: nowrap;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.app-data-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.app-data-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-data-table { color: #f9fafb; }
+  .app-data-table thead { background: #1f2937; }
+  .app-data-table thead th { border-bottom-color: #4b5563; }
+  .app-data-table tbody tr { border-bottom-color: #374151; }
+  .app-data-table tbody tr:hover { background: #1f2937; }
+}
+
+@media screen and (min-width: 1180px) {
+  body {
+    margin: auto;
+  }
+}
+
+@media screen and (min-width: 620px) {
+  body {
+    margin: 0 auto;
+  }
+}

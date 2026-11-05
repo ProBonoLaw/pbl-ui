@@ -1,0 +1,123 @@
+name: Deploy static UX and AKS API
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+
+jobs:
+  validate:
+    if: github.event.repository.private && github.repository == vars.AZURE_DEPLOYMENT_REPOSITORY
+    uses: ./.github/workflows/validate.yml
+    secrets: inherit
+
+  kubernetes:
+    name: Deploy API and verify Front Door
+    needs: validate
+    uses: ./.github/workflows/deploy-kubernetes.yml
+    with:
+      environment: ${{ inputs.environment }}
+    secrets: inherit
+
+  static-ui:
+    name: Deploy static UX
+    needs: kubernetes
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: ${{ inputs.environment }}
+    env:
+      STATIC_SITE_NAME: ${{ vars.STATIC_SITE_NAME }}
+      PORTAL_RESOURCE_GROUP: ${{ vars.PORTAL_RESOURCE_GROUP }}
+      FRONT_DOOR_HOSTNAME: ${{ vars.FRONT_DOOR_HOSTNAME }}
+      KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
+      AIMIE_EVIDENCE_SEARCH_URL: ${{ vars.AIMIE_EVIDENCE_SEARCH_URL }}
+      AIMIE_QA_FORMATTING_URL: ${{ vars.AIMIE_QA_FORMATTING_URL }}
+      AIMIE_QA_URL: ${{ vars.AIMIE_QA_URL }}
+      AIMIE_REALTIME_TIMELINE_URL: ${{ vars.AIMIE_REALTIME_TIMELINE_URL }}
+      AZURE_AD_AUDIENCE: ${{ vars.AZURE_AD_AUDIENCE }}
+      COSMOS_SQL_ENDPOINT: ${{ vars.COSMOS_SQL_ENDPOINT }}
+      NEXT_PUBLIC_AAD_API_SCOPE: ${{ vars.NEXT_PUBLIC_AAD_API_SCOPE }}
+      NEXT_PUBLIC_AAD_CLIENT_ID: ${{ vars.NEXT_PUBLIC_AAD_CLIENT_ID }}
+      NEXT_PUBLIC_AAD_REDIRECT_URI: ${{ vars.NEXT_PUBLIC_AAD_REDIRECT_URI }}
+      NEXT_PUBLIC_AAD_TENANT_ID: ${{ vars.NEXT_PUBLIC_AAD_TENANT_ID }}
+      STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+      NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION: ${{ vars.NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION }}
+      SHAREPOINT_HOST: ${{ vars.SHAREPOINT_HOST }}
+      AZURE_SHAREPOINT_READ_SCOPES: ${{ vars.AZURE_SHAREPOINT_READ_SCOPES }}
+      NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING: ${{ vars.NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING || secrets.NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING }}
+      APPLICATIONINSIGHTS_DISABLED: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      LEGAL_DOCUMENT_ARCHIVE_PATH: archives/TermsAndAgreements.zip
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check deployment configuration
+        run: |
+          for setting in STATIC_SITE_NAME PORTAL_RESOURCE_GROUP FRONT_DOOR_HOSTNAME KEY_VAULT_NAME; do
+            if [ -z "${!setting}" ]; then
+              echo "Missing environment variable: $setting" >&2
+              exit 1
+            fi
+          done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Load public build configuration
+        run: node deploy/select-runtime.mjs
+        env:
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      - name: Build static application
+        run: bun run build:ui && node deploy/verify-static.mjs
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Obtain temporary Static Web Apps deployment credential
+        id: token
+        run: |
+          token=$(az staticwebapp secrets list --name "$STATIC_SITE_NAME" --resource-group "$PORTAL_RESOURCE_GROUP" --query properties.apiKey --output tsv)
+          test -n "$token"
+          echo "::add-mask::$token"
+          echo "value=$token" >> "$GITHUB_OUTPUT"
+      - name: Publish static UX
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.token.outputs.value }}
+          action: upload
+          app_location: out
+          api_location: ''
+          output_location: ''
+          skip_app_build: true
+          skip_api_build: true
+      - name: Verify static deep links and API routing
+        run: |
+          for path in / /privacy /cases/local-routing-check/documents/root/Correspondence.txt /staff/local-routing-check.json /api/health; do
+            curl --fail --silent --show-error --retry 12 --retry-all-errors --retry-delay 10 --max-time 30 "https://$FRONT_DOOR_HOSTNAME$path" > /dev/null
+          done
+      - name: Verify public Test hostname after cutover
+        if: inputs.environment == 'Test'
+        run: |
+          test -n "$NEXT_PUBLIC_AAD_REDIRECT_URI"
+          for path in / /privacy /cases/local-routing-check/documents/root/Correspondence.txt /staff/local-routing-check.json /api/health; do
+            curl --proto '=https' --fail --silent --show-error --retry 12 --retry-all-errors --retry-delay 10 --max-time 30 "${NEXT_PUBLIC_AAD_REDIRECT_URI%/}$path" > /dev/null
+          done
+      - name: Verify Production hostname through Front Door before DNS cutover
+        if: inputs.environment == 'Production'
+        run: |
+          test -n "$NEXT_PUBLIC_AAD_REDIRECT_URI"
+          public_host=$(node -e 'process.stdout.write(new URL(process.env.NEXT_PUBLIC_AAD_REDIRECT_URI).hostname)')
+          for path in / /privacy /cases/local-routing-check/documents/root/Correspondence.txt /staff/local-routing-check.json /api/health; do
+            curl --proto '=https' --connect-to "$public_host:443:$FRONT_DOOR_HOSTNAME:443" --fail --silent --show-error --retry 12 --retry-all-errors --retry-delay 10 --max-time 30 "${NEXT_PUBLIC_AAD_REDIRECT_URI%/}$path" > /dev/null
+          done

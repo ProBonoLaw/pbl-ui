@@ -1,0 +1,33 @@
+{
+  "name": "Probono Law UI",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1.3.0": {},
+    "ghcr.io/devcontainers/features/github-cli:1.1.3": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:4.1.3": {},
+		"ghcr.io/devcontainers-extra/features/bun:1": {
+			"version": "1.4.2"
+		}
+  },
+
+  "initializeCommand": "docker network inspect my_shared_network > /dev/null || docker network create my_shared_network --attachable",
+  "runArgs": [
+    "--network=my_shared_network",
+    "--hostname=aimie-ui"
+  ],
+
+  "forwardPorts": [3000],
+
+  "postCreateCommand": "bun install --frozen-lockfile && bun run test:setup",
+  "containerEnv": {
+    "AZURE_OPENAI_API_KEY": "${localEnv:AZURE_OPENAI_API_KEY}"
+  },
+  // Configure tool-specific properties.
+	"customizations": {
+		"vscode": { "extensions": ["oven.bun-vscode", "openai.chatgpt", "github.vscode-github-actions", "github.vscode-pull-request-github"] }
+	},
+
+  // "customizations": {},
+  // "remoteUser": "root"
+}

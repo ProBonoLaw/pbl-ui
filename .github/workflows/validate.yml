@@ -1,0 +1,81 @@
+name: Validate application and deployment artifacts
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  validate:
+    # Playwright 1.58.2 supports Ubuntu 24.04, but not the 26.04 latest image.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      NEXT_PUBLIC_AAD_TENANT_ID: e2e-tenant
+      NEXT_PUBLIC_AAD_CLIENT_ID: e2e-client
+      NEXT_PUBLIC_AAD_REDIRECT_URI: http://localhost:3000
+      NEXT_PUBLIC_AAD_API_SCOPE: openid,profile
+      AZURE_AD_AUDIENCE: e2e-audience
+      APPLICATIONINSIGHTS_DISABLED: 'true'
+      NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING: ''
+      NEXT_TELEMETRY_DISABLED: '1'
+      LEGAL_DOCUMENT_ARCHIVE_PATH: archives/TermsAndAgreements.zip
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate GitHub Actions workflows
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.35.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install dependencies and Chromium
+        run: bun install --frozen-lockfile && bun run test:setup
+      - name: Lint and unit tests
+        run: bun run lint && bun run test
+      - name: Build static UI and standalone API
+        run: bun --bun run build && node deploy/verify-static.mjs
+        env:
+          AZURE_CLIENT_SECRET: STATIC_BUILD_PRIVATE_SECRET_SENTINEL
+          COSMOS_SQL_KEY: STATIC_BUILD_PRIVATE_SECRET_SENTINEL
+      - name: Browser tests against the production server
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          HOSTNAME: 0.0.0.0
+          PORT: '3000'
+          API_PORT: '3001'
+          PLAYWRIGHT_API_BASE_URL: http://localhost:3001
+          AZURE_FRONT_DOOR_ID: 00000000-0000-0000-0000-000000000076
+        run: |
+          bun run start > "$RUNNER_TEMP/next-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for _attempt in {1..60}; do
+            if curl --fail --silent http://localhost:3000/ > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            cat "$RUNNER_TEMP/next-server.log"
+            exit 1
+          fi
+          bun run test:e2e
+          bun run test:e2e:argument-viewer-dark-theme
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-diagnostics
+          path: |
+            test-results
+            ${{ runner.temp }}/next-server.log

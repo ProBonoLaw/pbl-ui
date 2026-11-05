@@ -1,0 +1,41 @@
+x-build: &app-build
+  context: .
+  args:
+    NEXT_PUBLIC_AAD_TENANT_ID: ${NEXT_PUBLIC_AAD_TENANT_ID:-e2e-tenant}
+    NEXT_PUBLIC_AAD_CLIENT_ID: ${NEXT_PUBLIC_AAD_CLIENT_ID:-e2e-client}
+    NEXT_PUBLIC_AAD_REDIRECT_URI: ${NEXT_PUBLIC_AAD_REDIRECT_URI:-http://localhost:3000}
+    NEXT_PUBLIC_AAD_API_SCOPE: ${NEXT_PUBLIC_AAD_API_SCOPE:-openid,profile}
+    NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION: ${NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION:-extension_example_IsAttorney}
+    NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING: ${NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING:-}
+
+services:
+  api:
+    image: pb-law-backend:local
+    build:
+      <<: *app-build
+      target: runner
+    env_file: ${PB_LAW_ENV_FILE:-.env}
+    environment:
+      PORT: '3000'
+      HOSTNAME: 0.0.0.0
+      PORTAL_API_ONLY: 'true'
+      PORTAL_LOCAL_DEVELOPMENT: 'true'
+      LEGAL_DOCUMENT_ARCHIVE_PATH: archives/TermsAndAgreements.zip
+    healthcheck:
+      test: ['CMD', 'bun', '-e', 'fetch("http://localhost:3000/api/health").then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  ui:
+    image: pb-law-ui:local
+    build:
+      <<: *app-build
+      target: static
+    environment:
+      API_ORIGIN: http://api:3000
+      PORT: '3000'
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '3000:3000'

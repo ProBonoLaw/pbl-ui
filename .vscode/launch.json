@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Bun: debug API",
+      "type": "bun",
+      "request": "launch",
+      "runtime": "bun",
+      "program": "${workspaceFolder}/deploy/debug-api.mjs",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "API_PORT": "3001",
+        "PORTAL_API_ONLY": "true",
+        "PORTAL_LOCAL_DEVELOPMENT": "true",
+        "LEGAL_DOCUMENT_ARCHIVE_PATH": "archives/TermsAndAgreements.zip"
+      }
+    },
+    {
+      "name": "UX: debug browser",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Bun: start UX",
+      "type": "bun",
+      "request": "launch",
+      "runtime": "bun",
+      "program": "${workspaceFolder}/node_modules/vite/bin/vite.js",
+      "args": ["--host", "0.0.0.0", "--port", "3000"],
+      "cwd": "${workspaceFolder}",
+      "noDebug": true,
+      "preLaunchTask": "Bun: generate public UI content",
+      "env": {
+        "PORT": "3000",
+        "API_PORT": "3001"
+      },
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "name": "UX: debug browser",
+        "killOnServerStop": true,
+        "pattern": "Local:.+(https?://[^\\s]+)"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Bun: debug full stack",
+      "configurations": ["Bun: debug API", "Bun: start UX"],
+      "stopAll": true
+    }
+  ]
+}

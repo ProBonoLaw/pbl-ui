@@ -1,0 +1,32 @@
+# Dependency directories
+node_modules
+build
+.next
+out
+frontend/generated
+
+# Environment and credentials
+.env*
+.npmrc
+*.pem
+certs
+
+# VCS and tooling metadata
+.git
+.github
+.devcontainer
+.vscode
+
+# Tests and coverage artifacts
+test-results
+tests/*
+!tests/production
+!tests/production/**
+coverage
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.DS_Store
+tsconfig.tsbuildinfo

@@ -1,0 +1,40 @@
+{
+  "Test": {
+    "subscription": "YOUR_SUBSCRIPTION",
+    "webapp": "YOUR_WEBAPP",
+    "webappResourceGroup": "YOUR_WEBAPP_RESOURCE_GROUP",
+    "cluster": "YOUR_CLUSTER",
+    "clusterResourceGroup": "YOUR_CLUSTER_RESOURCE_GROUP",
+    "registry": "YOUR_REGISTRY",
+    "registryResourceGroup": "YOUR_REGISTRY_RESOURCE_GROUP",
+    "namespace": "probonolaw-ui",
+    "keyVault": "YOUR_KEY_VAULT",
+    "portalResourceGroup": "YOUR_PORTAL_RESOURCE_GROUP",
+    "staticSite": "YOUR_STATIC_SITE",
+    "frontDoorId": "YOUR_FRONT_DOOR_ID",
+    "frontDoorHostname": "YOUR_FRONT_DOOR_HOSTNAME",
+    "apiOriginHostname": "YOUR_API_ORIGIN_HOSTNAME",
+    "apiPublicIpName": "YOUR_API_PUBLIC_IP_NAME",
+    "storageResourceGroup": "YOUR_STORAGE_RESOURCE_GROUP",
+    "storageAccount": "YOUR_STORAGE_ACCOUNT"
+  },
+  "Production": {
+    "subscription": "YOUR_SUBSCRIPTION",
+    "webapp": "YOUR_WEBAPP",
+    "webappResourceGroup": "YOUR_WEBAPP_RESOURCE_GROUP",
+    "cluster": "YOUR_CLUSTER",
+    "clusterResourceGroup": "YOUR_CLUSTER_RESOURCE_GROUP",
+    "registry": "YOUR_REGISTRY",
+    "registryResourceGroup": "YOUR_REGISTRY_RESOURCE_GROUP",
+    "namespace": "probonolaw-ui",
+    "keyVault": "YOUR_KEY_VAULT",
+    "portalResourceGroup": "YOUR_PORTAL_RESOURCE_GROUP",
+    "staticSite": "YOUR_STATIC_SITE",
+    "frontDoorId": "YOUR_FRONT_DOOR_ID",
+    "frontDoorHostname": "YOUR_FRONT_DOOR_HOSTNAME",
+    "apiOriginHostname": "YOUR_API_ORIGIN_HOSTNAME",
+    "apiPublicIpName": "YOUR_API_PUBLIC_IP_NAME",
+    "storageResourceGroup": "YOUR_STORAGE_RESOURCE_GROUP",
+    "storageAccount": "YOUR_STORAGE_ACCOUNT"
+  }
+}

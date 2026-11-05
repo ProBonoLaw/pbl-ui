@@ -1,0 +1,21 @@
+name: Deploy Production static UX and AKS API
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+
+jobs:
+  release:
+    if: github.event.repository.private && github.repository == vars.AZURE_DEPLOYMENT_REPOSITORY
+    uses: ./.github/workflows/release.yml
+    with:
+      environment: Production
+    secrets: inherit

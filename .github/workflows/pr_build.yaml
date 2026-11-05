@@ -1,0 +1,36 @@
+name: PR Build and Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: validate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+    secrets: inherit
+
+  # Keep the status-check name required by the repository's Gated Merge rule.
+  build-and-test:
+    needs: validate
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require successful application validation
+        env:
+          VALIDATION_RESULT: ${{ needs.validate.result }}
+        run: |
+          if [ "$VALIDATION_RESULT" != success ]; then
+            echo "Application validation did not succeed: $VALIDATION_RESULT" >&2
+            exit 1
+          fi

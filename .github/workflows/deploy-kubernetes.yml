@@ -1,0 +1,136 @@
+name: Build image and deploy to AKS
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+
+jobs:
+  deploy:
+    if: github.event.repository.private && github.repository == vars.AZURE_DEPLOYMENT_REPOSITORY
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.environment }}
+    env:
+      AKS_RESOURCE_GROUP: ${{ vars.AKS_RESOURCE_GROUP }}
+      AKS_CLUSTER_NAME: ${{ vars.AKS_CLUSTER_NAME }}
+      ACR_NAME: ${{ vars.ACR_NAME }}
+      ACR_RESOURCE_GROUP: ${{ vars.ACR_RESOURCE_GROUP }}
+      K8S_NAMESPACE: ${{ vars.K8S_NAMESPACE }}
+      K8S_AZURE_CLIENT_ID: ${{ vars.K8S_AZURE_CLIENT_ID }}
+      AZURE_FRONT_DOOR_ID: ${{ vars.AZURE_FRONT_DOOR_ID }}
+      FRONT_DOOR_HOSTNAME: ${{ vars.FRONT_DOOR_HOSTNAME }}
+      API_ORIGIN_HOSTNAME: ${{ vars.API_ORIGIN_HOSTNAME }}
+      API_PUBLIC_IP_NAME: ${{ vars.API_PUBLIC_IP_NAME }}
+      KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
+      AIMIE_EVIDENCE_SEARCH_URL: ${{ vars.AIMIE_EVIDENCE_SEARCH_URL }}
+      AIMIE_QA_FORMATTING_URL: ${{ vars.AIMIE_QA_FORMATTING_URL }}
+      AIMIE_QA_URL: ${{ vars.AIMIE_QA_URL }}
+      AIMIE_REALTIME_TIMELINE_URL: ${{ vars.AIMIE_REALTIME_TIMELINE_URL }}
+      AZURE_AD_AUDIENCE: ${{ vars.AZURE_AD_AUDIENCE }}
+      COSMOS_SQL_ENDPOINT: ${{ vars.COSMOS_SQL_ENDPOINT }}
+      NEXT_PUBLIC_AAD_API_SCOPE: ${{ vars.NEXT_PUBLIC_AAD_API_SCOPE }}
+      NEXT_PUBLIC_AAD_CLIENT_ID: ${{ vars.NEXT_PUBLIC_AAD_CLIENT_ID }}
+      NEXT_PUBLIC_AAD_REDIRECT_URI: ${{ vars.NEXT_PUBLIC_AAD_REDIRECT_URI }}
+      NEXT_PUBLIC_AAD_TENANT_ID: ${{ vars.NEXT_PUBLIC_AAD_TENANT_ID }}
+      STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+      NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION: ${{ vars.NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      SHAREPOINT_HOST: ${{ vars.SHAREPOINT_HOST }}
+      AZURE_SHAREPOINT_READ_SCOPES: ${{ vars.AZURE_SHAREPOINT_READ_SCOPES }}
+      NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING: ${{ vars.NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING || secrets.NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Check deployment configuration
+        run: |
+          for setting in AKS_RESOURCE_GROUP AKS_CLUSTER_NAME ACR_NAME ACR_RESOURCE_GROUP K8S_NAMESPACE K8S_AZURE_CLIENT_ID AZURE_FRONT_DOOR_ID FRONT_DOOR_HOSTNAME API_ORIGIN_HOSTNAME API_PUBLIC_IP_NAME KEY_VAULT_NAME AZURE_TENANT_ID; do
+            if [ -z "${!setting}" ]; then
+              echo "Missing environment variable: $setting" >&2
+              exit 1
+            fi
+          done
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Load validated public build settings
+        run: node deploy/select-runtime.mjs
+        env:
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+      - name: Check public API DNS and TLS prerequisites
+        run: node deploy/check-public-origin.mjs
+      - name: Resolve and sign in to registry
+        id: registry
+        run: |
+          registry=$(az acr show --name "$ACR_NAME" --resource-group "$ACR_RESOURCE_GROUP" --query loginServer --output tsv)
+          echo "image=$registry/pb-law-backend" >> "$GITHUB_OUTPUT"
+          az acr login --name "$ACR_NAME" --resource-group "$ACR_RESOURCE_GROUP" --output none
+      - uses: docker/setup-buildx-action@v3
+      - name: Build and publish environment image
+        id: image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.registry.outputs.image }}:${{ github.sha }}
+          platforms: linux/amd64
+          build-args: |
+            NEXT_PUBLIC_AAD_TENANT_ID=${{ env.NEXT_PUBLIC_AAD_TENANT_ID }}
+            NEXT_PUBLIC_AAD_CLIENT_ID=${{ env.NEXT_PUBLIC_AAD_CLIENT_ID }}
+            NEXT_PUBLIC_AAD_REDIRECT_URI=${{ env.NEXT_PUBLIC_AAD_REDIRECT_URI }}
+            NEXT_PUBLIC_AAD_API_SCOPE=${{ env.NEXT_PUBLIC_AAD_API_SCOPE }}
+            NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION=${{ env.NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION }}
+            NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING=${{ env.NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING }}
+          cache-from: type=gha,scope=backend-${{ inputs.environment }}
+          cache-to: type=gha,mode=max,scope=backend-${{ inputs.environment }}
+      - name: Prepare environment trust bundle
+        id: ca
+        run: node deploy/prepare-ca.mjs
+        env:
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+          PRODUCTION_INTERNAL_CA_CERT_PEM: ${{ secrets.PRODUCTION_INTERNAL_CA_CERT_PEM }}
+      - name: Render Kubernetes release with Key Vault references
+        run: |
+          umask 077
+          node deploy/select-runtime.mjs
+          node deploy/render-kubernetes.mjs
+          node deploy/render-public-ingress.mjs
+        env:
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+          DEPLOY_IMAGE: ${{ steps.registry.outputs.image }}@${{ steps.image.outputs.digest }}
+          RUNTIME_SETTINGS_PATH: ${{ runner.temp }}/runtime-settings.json
+          INTERNAL_CA_CERT_PATH: ${{ steps.ca.outputs.path }}
+          DEPLOY_OUTPUT_DIR: ${{ runner.temp }}/kubernetes-release
+          DEPLOY_RELEASE_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Apply release and wait for rollout through AKS Run Command
+        run: bash deploy/invoke-aks.sh
+        env:
+          DEPLOY_OUTPUT_DIR: ${{ runner.temp }}/kubernetes-release
+          DEPLOY_IMAGE: ${{ steps.registry.outputs.image }}@${{ steps.image.outputs.digest }}
+      - name: Point latest to the successfully deployed image
+        env:
+          IMAGE: ${{ steps.registry.outputs.image }}
+          DEPLOY_DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          docker buildx imagetools create --prefer-index=false \
+            --tag "$IMAGE:latest" "$IMAGE@$DEPLOY_DIGEST"
+          latest_digest=$(docker buildx imagetools inspect "$IMAGE:latest" \
+            --format '{{json .Manifest}}' | node -e 'let json = ""; process.stdin.on("data", chunk => json += chunk); process.stdin.on("end", () => process.stdout.write(JSON.parse(json).digest));')
+          test "$latest_digest" = "$DEPLOY_DIGEST"
+      - name: Verify API through Front Door
+        run: curl --fail --silent --show-error --retry 12 --retry-all-errors --retry-delay 10 --max-time 30 "https://$FRONT_DOOR_HOSTNAME/api/health" > /dev/null
+      - name: Remove temporary credentials
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/runtime-settings.json" "$RUNNER_TEMP/kubernetes-release"

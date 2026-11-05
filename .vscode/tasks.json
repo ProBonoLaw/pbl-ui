@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Bun: generate public UI content",
+      "type": "process",
+      "command": "bun",
+      "args": ["deploy/export-public-content.ts"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "LEGAL_DOCUMENT_ARCHIVE_PATH": "archives/TermsAndAgreements.zip"
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -145,6 +145,10 @@
     "optional": true
   },
   {
+    "name": "NEXT_PUBLIC_SUPPORT_EMAIL",
+    "valueFrom": "NEXT_PUBLIC_SUPPORT_EMAIL"
+  },
+  {
     "name": "SHAREPOINT_HOST",
     "valueFrom": "SHAREPOINT_HOST"
   },

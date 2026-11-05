@@ -58,7 +58,18 @@ test.describe('Privacy route', () => {
       securityControlsCard.getByText(/vulnerability scanning/i),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: 'View SOC 2 Type 2 report' }),
-    ).toHaveAttribute('href', '/api/privacy/soc-2-type-2-report');
+      page.getByRole('link', { name: 'Request SOC 2 Type 2 report' }),
+    ).toHaveAttribute('href', `mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@example.test'}?subject=SOC%202%20Type%202%20report%20request`);
+    await expect(page.locator('a[href="/api/privacy/soc-2-type-2-report"]')).toHaveCount(0);
+  });
+
+  test('former SOC 2 download rejects GET and HEAD without caching', async ({ request }) => {
+    for (const method of ['GET', 'HEAD']) {
+      const response = await request.fetch('/api/privacy/soc-2-type-2-report', { method });
+      expect(response.status()).toBe(410);
+      expect(response.headers()['cache-control']).toBe('private, no-store');
+      expect(response.headers()['content-type']).toContain('application/json');
+      expect(response.headers()['content-disposition']).toBeUndefined();
+    }
   });
 });

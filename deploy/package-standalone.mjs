@@ -9,15 +9,9 @@ export async function packageStandalone(projectDirectory, certificatePath) {
   for (const relative of ['build/static', 'public', 'archives', 'lib/terms-of-service-agreements']) {
     await cp(join(projectDirectory, relative), join(destination, relative), { recursive: true });
   }
-  // Only the private deployment repository supplies this distribution asset.
-  const report = 'deploy/private/soc2-report.pdf';
-  try {
-    await stat(join(projectDirectory, report));
-    await mkdir(join(destination, 'deploy/private'), { recursive: true });
-    await cp(join(projectDirectory, report), join(destination, report));
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-  }
+  // Private records are distributed manually, never by the application. Also
+  // remove copies left by tracing or an older incremental package build.
+  await rm(join(destination, 'deploy/private'), { recursive: true, force: true });
   if (certificatePath) {
     await mkdir(join(destination, 'certs'), { recursive: true });
     await cp(certificatePath, join(destination, 'certs', basename(certificatePath)));

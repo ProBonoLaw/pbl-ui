@@ -10,6 +10,7 @@ frontend/generated
 .npmrc
 *.pem
 certs
+deploy/private
 
 # VCS and tooling metadata
 .git

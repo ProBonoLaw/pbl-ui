@@ -27,7 +27,7 @@ try {
     status: 200, contentType: 'application/json', body: JSON.stringify([{
       id: '00000000-0000-4000-8000-000000000100',
       emailAddresses: ['e2e.user@example.com'], oids: ['00000000-0000-4000-8000-000000000101'],
-      casesAccounts, accountId: '00000000-0000-0000-0000-000000000000',
+      casesAccounts, accountId: '00000000-0000-4000-8000-000000000102',
       agreedToTerms: true, isActive: true,
     }]),
   }));

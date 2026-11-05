@@ -9,7 +9,8 @@ const { config } = splitRuntimeSettings(settings, process.env.KEY_VAULT_NAME);
 if (process.env.RUNTIME_SETTINGS_PATH) await writeFile(process.env.RUNTIME_SETTINGS_PATH, JSON.stringify(settings), { mode: 0o600 });
 if (process.env.GITHUB_ENV) {
   const names = ['NEXT_PUBLIC_AAD_TENANT_ID', 'NEXT_PUBLIC_AAD_CLIENT_ID', 'NEXT_PUBLIC_AAD_REDIRECT_URI',
-    'NEXT_PUBLIC_AAD_API_SCOPE', 'NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION', 'NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING'];
+    'NEXT_PUBLIC_AAD_API_SCOPE', 'NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION', 'NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING',
+    'NEXT_PUBLIC_SUPPORT_EMAIL'];
   for (const name of names) {
     const value = config[name] ?? '';
     if (/[\r\n]/.test(value)) throw new Error(`Invalid public build setting ${name}`);

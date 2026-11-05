@@ -28,6 +28,7 @@ test('standalone package includes legal content and assets while removing local 
     'build/standalone/.env': 'secret',
     'build/standalone/.env.local': 'secret',
     'build/standalone/.npmrc': 'token',
+    'build/standalone/deploy/private/soc2-report.pdf': 'stale report from an older build',
     'build/static/app.js': 'client',
     'public/logo.png': 'logo',
     'archives/TermsAndAgreements.zip': 'agreements',
@@ -46,7 +47,7 @@ test('standalone package includes legal content and assets while removing local 
   }
   const packagedFiles = await readdir(join(project, 'build/standalone'));
   assert.ok(!packagedFiles.some((name) => name.startsWith('.env') || name === '.npmrc'));
-  assert.equal(await readFile(join(project, 'build/standalone/deploy/private/soc2-report.pdf'), 'utf8'), 'private deployment report');
+  await assert.rejects(readFile(join(project, 'build/standalone/deploy/private/soc2-report.pdf')), { code: 'ENOENT' });
   await assert.rejects(readFile(join(project, 'build/standalone/deploy/private/azure-environments.json')), { code: 'ENOENT' });
 });
 

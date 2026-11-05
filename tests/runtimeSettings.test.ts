@@ -99,6 +99,7 @@ for (const environment of ['Test', 'Production']) {
           KEY_VAULT_NAME: vaultName,
           SHAREPOINT_HOST: 'sharepoint.example.test',
           AZURE_SHAREPOINT_READ_SCOPES: scopes,
+          NEXT_PUBLIC_SUPPORT_EMAIL: 'requests+ci@example.test',
           ...(connectionString ? { NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING: connectionString } : {}),
           RUNTIME_SETTINGS_PATH: runtimePath,
           GITHUB_ENV: publicPath,
@@ -110,11 +111,13 @@ for (const environment of ['Test', 'Production']) {
       assert.equal(config.SHAREPOINT_HOST, 'sharepoint.example.test');
       assert.equal(config.AZURE_SHAREPOINT_READ_SCOPES, scopes);
       assert.equal(config.NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING, connectionString);
+      assert.equal(config.NEXT_PUBLIC_SUPPORT_EMAIL, 'requests+ci@example.test');
       assert.equal(config.WEB_PUBSUB_CONNECTION_STRING, undefined);
       assert.ok(secrets.some((secret: { name: string }) => secret.name === 'WEB_PUBSUB_CONNECTION_STRING'));
       assert.ok(settings.every((setting: object) => !Object.hasOwn(setting, 'valueFrom') && !Object.hasOwn(setting, 'keyVaultSecret')));
       const publicSettings = await readFile(publicPath, 'utf8');
       assert.match(publicSettings, /NEXT_PUBLIC_AAD_CLIENT_ID=/);
+      assert.ok(publicSettings.split('\n').includes('NEXT_PUBLIC_SUPPORT_EMAIL=requests+ci@example.test'));
       assert.ok(publicSettings.split('\n').includes(`NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING=${connectionString}`));
       assert.doesNotMatch(publicSettings, /SHAREPOINT|sharepoint\.example\.test|WEB_PUBSUB|vault\.azure\.net/);
     });

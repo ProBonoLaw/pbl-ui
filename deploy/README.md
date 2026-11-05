@@ -57,9 +57,17 @@ realtime URLs supplied to authenticated users can identify the service.
 
 - `azure-environments.json` is the operator's Azure resource inventory.
 - `test-root-ca.pem` is the public Test trust certificate, not its private key.
-- `soc2-report.pdf` is the existing deployment-only compliance asset. Its
-  publication policy is unchanged by source migration and remains an operator
-  decision. It is excluded from the public repository and public builds.
+- `soc2-report.pdf` is retained for manual distribution after an email request
+  to the address configured by `NEXT_PUBLIC_SUPPORT_EMAIL`. It is excluded from
+  public exports, Docker build contexts, and application packages. The former download endpoint returns
+  `410 Gone` with `Cache-Control: private, no-store`; the home and privacy pages
+  link to an email request instead of the PDF.
+
+Set `NEXT_PUBLIC_SUPPORT_EMAIL` in each GitHub deployment environment (or in
+the local `.env` file). Both SOC 2 request links use this shared support address.
+It is public build-time configuration: rebuild and redeploy the static UI to
+change it. No address is hardcoded as a fallback; unconfigured local/public
+builds show that report requests are unavailable. Private releases require it.
 
 Production supplies its public CA via `PRODUCTION_INTERNAL_CA_CERT_PEM` in the
 Production environment. Test can alternatively supply `TEST_INTERNAL_CA_CERT_PEM`.
@@ -89,6 +97,29 @@ checks succeed can the import merge; the controller then dispatches private CI
 and the Test release. Production remains manual. Failed checks, conflicts,
 rewritten public history, and modifications to reserved private paths stop the
 import. Neither repository force-pushes or mirrors all refs.
+
+Validation checkouts do not persist GitHub credentials. Before dependency
+installation or any application code runs, a protected sanitizer removes
+`deploy/private/`, the private controller/audit, and the entire `.git` directory.
+Imported tests cannot read retained private records or recover them from Git
+objects. This runs on an ephemeral GitHub-hosted validation runner with mock
+configuration, separate from the private import controller and release jobs.
+
+Automatic imports reject additions, edits, deletions, renames, and mode changes
+under `.github/` and `deploy/`, and to `Dockerfile`, `.dockerignore`,
+`compose.yaml`, and `OPEN_SOURCE_READINESS.md`. Public copies of the deployment
+machinery remain available for review; changes require a separate private
+review and an explicit update of the approved public baseline in
+`.github/private-sync/state.json`. The pending private import is checked again
+against private `main`, allowing only the controller's state file to change.
+
+Both check gates require `.github/workflows/pr_build.yaml`, whose definition
+and local reusable workflows are protected by those path checks. Public
+validation must be a `push` run for the exact public `main` commit; private
+validation must be a `pull_request` run for the exact import branch and head.
+Required check names must belong to that workflow's check suite. Results from
+other workflows, branches, forks, or commits cannot satisfy the gate, and a
+failed or pending newer run blocks import even if an older run succeeded.
 
 The public repository starts with new history. The initial private migration
 links the approved public snapshot as an ancestor without exporting private

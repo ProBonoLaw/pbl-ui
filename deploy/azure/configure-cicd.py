@@ -1,7 +1,7 @@
 """Configure environment-scoped GitHub OIDC and AKS workload identities.
 
 Run with Azure role-assignment privileges and GitHub environment variable access:
-  python3 deploy/azure/configure-cicd.py --environment Test
+  python3 deploy/azure/configure-cicd.py --environment Test --repo OWNER/REPOSITORY --config /path/to/private-inventory.json
 """
 import argparse
 import json

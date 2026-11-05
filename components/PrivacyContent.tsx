@@ -1,4 +1,5 @@
 import type { PrivacyPolicyDocument } from '@/lib/privacyPolicyDocuments';
+import { soc2ReportRequestHref } from '@/lib/supportContact';
 import DecorativePageBackground from '@/components/DecorativePageBackground';
 import { FileCheck2, FileText, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -132,15 +133,19 @@ export default function PrivacyContent({ document }: { document: PrivacyPolicyDo
                 SOC 2 Type 2
               </h2>
               <p className="mt-2 flex-1 text-sm leading-6 text-gray-600 dark:text-gray-300">
-                Independent attestation report available for review.
+                Independent attestation report available by email request.
               </p>
-              <Link
-                href="/api/privacy/soc-2-type-2-report"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-5 inline-flex justify-center self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400">
-                View SOC 2 Type 2 report
-              </Link>
+              {soc2ReportRequestHref ? (
+                <Link
+                  href={soc2ReportRequestHref}
+                  className="mt-5 inline-flex justify-center self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400">
+                  Request SOC 2 Type 2 report
+                </Link>
+              ) : (
+                <p className="mt-5 text-sm text-gray-600 dark:text-gray-300">
+                  Report requests are currently unavailable.
+                </p>
+              )}
             </div>
           </div>
         </div>

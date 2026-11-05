@@ -4,6 +4,10 @@ The primary UI portal for ProBono-Law.com. Public development takes place in
 [ProBonoLaw/pbl-ui](https://github.com/ProBonoLaw/pbl-ui). Azure deployments run
 only from the private deployment repository; see [deployment](deploy/README.md).
 
+## License
+
+This project is licensed under the [Apache License, Version 2.0](LICENSE).
+
 ## Known Configuration
 
 ### React Compiler (Auto-Memoization)
@@ -60,6 +64,7 @@ Below is a list of environment variables used in this project:
 | NEXT_PUBLIC_AAD_REDIRECT_URI                          | Redirect URI for Azure AD                                                   | http://localhost:3000             |
 | NEXT_PUBLIC_AAD_TENANT_ID                             | Tenant ID for Azure AD                                                      | None                              |
 | NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING             | Optional browser telemetry configuration from a GitHub variable or secret; browser-visible when enabled | Empty (disabled)                  |
+| NEXT_PUBLIC_SUPPORT_EMAIL                            | Public support address for email links, including SOC 2 report requests; set before building | None (request links unavailable) |
 | NODE_EXTRA_CA_CERTS                                   | Environment-specific server trust bundle for private AKS ingress            | None                              |
 | NEWSLETTER_TABLE_NAME                                 | Azure Table name for newsletter signups                                     | newsletter                        |
 | SHAREPOINT_HOST                                       | SharePoint hostname from the GitHub environment variable of the same name   | Required for deployment           |

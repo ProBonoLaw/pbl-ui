@@ -2,6 +2,7 @@
 
 import { FileCheck2, FileText, LockKeyhole, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { soc2ReportRequestHref } from '@/lib/supportContact';
 
 const policyLinks = [
   {
@@ -15,9 +16,9 @@ const policyLinks = [
   {
     title: 'SOC 2 Type 2 Report',
     description:
-      'View the independent attestation report for security controls supporting the platform.',
-    href: '/api/privacy/soc-2-type-2-report',
-    action: 'View report',
+      'Request the independent attestation report by email to review security controls supporting the platform.',
+    href: soc2ReportRequestHref,
+    action: 'Request report',
     icon: FileCheck2,
   },
 ];
@@ -37,9 +38,8 @@ export default function PrivacyPolicies() {
             Privacy and security policies
           </h2>
           <p className="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300 sm:text-lg">
-            ProBono Law publishes privacy materials and independent security
-            attestations so firms can evaluate how sensitive legal data is
-            handled.
+            Review privacy materials and request independent security
+            attestations to evaluate how sensitive legal data is handled.
           </p>
         </div>
 
@@ -62,22 +62,18 @@ export default function PrivacyPolicies() {
               <p className="mt-4 flex-1 text-base leading-7 text-gray-600 dark:text-gray-300">
                 {policyLink.description}
               </p>
-              <Link
-                href={policyLink.href}
-                target={
-                  policyLink.href.endsWith('soc-2-type-2-report')
-                    ? '_blank'
-                    : undefined
-                }
-                rel={
-                  policyLink.href.endsWith('soc-2-type-2-report')
-                    ? 'noopener noreferrer'
-                    : undefined
-                }
-                className="mt-6 inline-flex items-center self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500">
-                <LockKeyhole className="mr-2 h-4 w-4" aria-hidden="true" />
-                {policyLink.action}
-              </Link>
+              {policyLink.href ? (
+                <Link
+                  href={policyLink.href}
+                  className="mt-6 inline-flex items-center self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500">
+                  <LockKeyhole className="mr-2 h-4 w-4" aria-hidden="true" />
+                  {policyLink.action}
+                </Link>
+              ) : (
+                <p className="mt-6 text-sm text-gray-600 dark:text-gray-300">
+                  Report requests are currently unavailable.
+                </p>
+              )}
             </article>
           ))}
         </div>

@@ -17,6 +17,7 @@ jobs:
       NEXT_PUBLIC_AAD_CLIENT_ID: e2e-client
       NEXT_PUBLIC_AAD_REDIRECT_URI: http://localhost:3000
       NEXT_PUBLIC_AAD_API_SCOPE: openid,profile
+      NEXT_PUBLIC_SUPPORT_EMAIL: support@example.test
       AZURE_AD_AUDIENCE: e2e-audience
       APPLICATIONINSIGHTS_DISABLED: 'true'
       NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING: ''
@@ -24,8 +25,12 @@ jobs:
       LEGAL_DOCUMENT_ARCHIVE_PATH: archives/TermsAndAgreements.zip
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Sanitize validation checkout before running application code
+        run: python3 -I deploy/sanitize-validation.py
       - name: Validate GitHub Actions workflows
-        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 .github/workflows/*.yml .github/workflows/*.yaml
       - uses: azure/setup-kubectl@v4
         with:
           version: v1.35.1

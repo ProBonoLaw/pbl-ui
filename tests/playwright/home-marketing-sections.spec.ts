@@ -96,15 +96,15 @@ test.describe('Home marketing sections', () => {
       }),
     ).toBeVisible();
     await expect(
-      section.getByText(/independent security attestations/i),
+      section.getByText(/independent security\s+attestations/i),
     ).toBeVisible();
 
     await expect(
       section.getByRole('link', { name: /Open privacy page/i }),
     ).toHaveAttribute('href', '/privacy');
     await expect(
-      section.getByRole('link', { name: /View report/i }),
-    ).toHaveAttribute('href', '/api/privacy/soc-2-type-2-report');
+      section.getByRole('link', { name: /Request report/i }),
+    ).toHaveAttribute('href', `mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@example.test'}?subject=SOC%202%20Type%202%20report%20request`);
   });
 
   test('renders HowItWorks section with shared screenshot', async ({

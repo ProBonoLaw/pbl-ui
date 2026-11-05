@@ -30,6 +30,7 @@ export default defineConfig({
           NEXT_PUBLIC_AAD_CLIENT_ID: 'e2e-client',
           NEXT_PUBLIC_AAD_REDIRECT_URI: baseURL,
           NEXT_PUBLIC_AAD_API_SCOPE: 'openid,profile',
+          NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@example.test',
           AZURE_AD_AUDIENCE: 'e2e-audience',
           APPLICATIONINSIGHTS_DISABLED: 'true',
           NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING: '',

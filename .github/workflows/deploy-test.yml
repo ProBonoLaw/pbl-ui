@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   release:
-    if: github.event.repository.private && github.repository == vars.AZURE_DEPLOYMENT_REPOSITORY
+    if: ${{ vars.TEST_ENVIRONMENT_ENABLED == 'true' && (github.event.repository.private && github.repository == vars.AZURE_DEPLOYMENT_REPOSITORY) }}
     uses: ./.github/workflows/release.yml
     with:
       environment: Test

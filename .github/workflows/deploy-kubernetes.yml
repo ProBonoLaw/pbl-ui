@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   deploy:
-    if: github.event.repository.private && github.repository == vars.AZURE_DEPLOYMENT_REPOSITORY
+    if: ${{ (!contains(inputs.environment, 'test') || vars.TEST_ENVIRONMENT_ENABLED == 'true') && (github.event.repository.private && github.repository == vars.AZURE_DEPLOYMENT_REPOSITORY) }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: ${{ inputs.environment }}

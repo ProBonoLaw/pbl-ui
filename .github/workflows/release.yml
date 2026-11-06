@@ -19,6 +19,7 @@ jobs:
     secrets: inherit
 
   kubernetes:
+    if: ${{ (!contains(inputs.environment, 'test') || vars.TEST_ENVIRONMENT_ENABLED == 'true') }}
     name: Deploy API and verify Front Door
     needs: validate
     uses: ./.github/workflows/deploy-kubernetes.yml
@@ -27,6 +28,7 @@ jobs:
     secrets: inherit
 
   static-ui:
+    if: ${{ (!contains(inputs.environment, 'test') || vars.TEST_ENVIRONMENT_ENABLED == 'true') }}
     name: Deploy static UX
     needs: kubernetes
     runs-on: ubuntu-latest

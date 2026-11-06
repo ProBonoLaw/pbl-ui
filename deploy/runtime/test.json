@@ -1,0 +1,184 @@
+[
+  {
+    "name": "AIMIE_EVIDENCE_SEARCH_URL",
+    "valueFrom": "AIMIE_EVIDENCE_SEARCH_URL"
+  },
+  {
+    "name": "AIMIE_QA_FORMATTING_URL",
+    "valueFrom": "AIMIE_QA_FORMATTING_URL"
+  },
+  {
+    "name": "AIMIE_QA_KEY",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "AIMIE_QA_SUBSCRIPTION_KEY",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "AIMIE_QA_URL",
+    "valueFrom": "AIMIE_QA_URL"
+  },
+  {
+    "name": "AIMIE_REALTIME_TIMELINE_SUBSCRIPTION_KEY",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "AIMIE_REALTIME_TIMELINE_URL",
+    "valueFrom": "AIMIE_REALTIME_TIMELINE_URL"
+  },
+  {
+    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "AZURE_AD_AUDIENCE",
+    "valueFrom": "AZURE_AD_AUDIENCE"
+  },
+  {
+    "name": "AZURE_CLIENT_SECRET",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "AZURE_EVENT_ACCOUNTS_INITIALIZATION_HUB_NAME",
+    "value": "account-operations"
+  },
+  {
+    "name": "AZURE_EVENT_CLEANUP_ACCOUNTS_HUB_NAME",
+    "value": "account-operations"
+  },
+  {
+    "name": "AZURE_EVENT_FILE_INGESTION_CONNECTION_STRING",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "AZURE_EVENT_FILE_INGESTION_HUB_NAME",
+    "value": "file-operations"
+  },
+  {
+    "name": "AZURE_EVENT_GRANT_USER_ACCESS_TO_SHAREPOINT_HUB_NAME",
+    "value": "account-operations"
+  },
+  {
+    "name": "AZURE_EVENT_HUB_ACCOUNT_MANAGEMENT_CONNECTION_STRING",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "AZURE_EVENT_HUB_CONNECTION_STRING",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "AZURE_EVENT_REQUESTS_HUB_NAME",
+    "value": "aimie-request-queue"
+  },
+  {
+    "name": "AZURE_EVENT_REVOKE_USER_ACCESS_TO_SHAREPOINT_HUB_NAME",
+    "value": "account-operations"
+  },
+  {
+    "name": "AZURE_EVENT_USER_LINKING_REQUESTS_HUB_NAME",
+    "value": "account-operations"
+  },
+  {
+    "name": "COSMOS_DB_AIMIE_STATS_CONTAINER",
+    "value": "aimieStats"
+  },
+  {
+    "name": "COSMOS_DB_USAGE_CONTAINER",
+    "value": "accountUsage"
+  },
+  {
+    "name": "COSMOS_SQL_CLIENT_FEEDBACK_REQUEST_CONTAINER",
+    "value": "clientFeedbackRequests"
+  },
+  {
+    "name": "COSMOS_SQL_CONTAINER",
+    "value": "accounts"
+  },
+  {
+    "name": "COSMOS_SQL_DB",
+    "value": "db_conversation_history"
+  },
+  {
+    "name": "COSMOS_SQL_ENDPOINT",
+    "valueFrom": "COSMOS_SQL_ENDPOINT"
+  },
+  {
+    "name": "COSMOS_SQL_KEY",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "COSMOS_SQL_NOTIFICATIONS_CONTAINER",
+    "value": "notices"
+  },
+  {
+    "name": "COSMOS_SQL_REQUESTS_CONTAINER",
+    "value": "requests"
+  },
+  {
+    "name": "LEGAL_DOCUMENT_ARCHIVE_PATH",
+    "value": "archives/TermsAndAgreements.zip"
+  },
+  {
+    "name": "NEXT_PUBLIC_AAD_API_SCOPE",
+    "valueFrom": "NEXT_PUBLIC_AAD_API_SCOPE"
+  },
+  {
+    "name": "NEXT_PUBLIC_AAD_CLIENT_ID",
+    "valueFrom": "NEXT_PUBLIC_AAD_CLIENT_ID"
+  },
+  {
+    "name": "NEXT_PUBLIC_AAD_REDIRECT_URI",
+    "valueFrom": "NEXT_PUBLIC_AAD_REDIRECT_URI"
+  },
+  {
+    "name": "NEXT_PUBLIC_AAD_TENANT_ID",
+    "valueFrom": "NEXT_PUBLIC_AAD_TENANT_ID"
+  },
+  {
+    "name": "NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING",
+    "valueFrom": "NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING",
+    "optional": true
+  },
+  {
+    "name": "NEXT_PUBLIC_SUPPORT_EMAIL",
+    "valueFrom": "NEXT_PUBLIC_SUPPORT_EMAIL"
+  },
+  {
+    "name": "SHAREPOINT_HOST",
+    "valueFrom": "SHAREPOINT_HOST"
+  },
+  {
+    "name": "AZURE_SHAREPOINT_READ_SCOPES",
+    "valueFrom": "AZURE_SHAREPOINT_READ_SCOPES",
+    "optional": true
+  },
+  {
+    "name": "STAFF_PHOTO_CONTAINER_NAME",
+    "value": "staffphotos"
+  },
+  {
+    "name": "STAFF_TABLE_NAME",
+    "value": "staff"
+  },
+  {
+    "name": "STORAGE_ACCOUNT_NAME",
+    "valueFrom": "STORAGE_ACCOUNT_NAME"
+  },
+  {
+    "name": "WEB_PUBSUB_CONNECTION_STRING",
+    "keyVaultSecret": true
+  },
+  {
+    "name": "WEB_PUBSUB_HUB",
+    "value": "notification"
+  },
+  {
+    "name": "NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION",
+    "valueFrom": "NEXT_PUBLIC_AAD_ATTORNEY_EXTENSION"
+  }
+]
